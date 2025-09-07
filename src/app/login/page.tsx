@@ -19,28 +19,31 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // URL CORREGIDA: /login en lugar de /usuarios
-      const response = await fetch("http://localhost:3000/api/v1/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          correo: email,
-          contraseña: password,
-        }),
-      });
+      const response = await fetch(
+        `http://localhost:4000/api/v1/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            correo: email,
+            contraseña: password,
+          }),
+          credentials: "include", // importante si usas cookies o JWT
+        }
+      );
 
       if (response.ok) {
         const result = await response.json();
-        
+
         if (result.status === "success") {
-          // Guardar token - ajusta según tu estructura real
+          // Guardar token - ajusta según tu backend
           if (result.data.access_token) {
             document.cookie = `token=${result.data.access_token}; path=/; max-age=86400`; // 1 día
           }
 
-          // Redirigir
+          // Redirigir al dashboard o ruta indicada
           const redirectUrl = result.data.redirectTo || "/dashboard";
           router.push(redirectUrl);
         } else {
@@ -117,7 +120,10 @@ export default function LoginPage() {
           </p>
 
           <p className="mt-4">
-            <Link href="/forgotpassword" className="text-blue-600 hover:underline">
+            <Link
+              href="/forgotpassword"
+              className="text-blue-600 hover:underline"
+            >
               ¿Olvidaste tu contraseña?
             </Link>
           </p>
