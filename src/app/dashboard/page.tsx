@@ -1,9 +1,12 @@
-import { Sidebar } from "@/components/sidebar"; 
+"use client";
 
-export default function DashboardPage() {
-  return(
+import { Sidebar } from "@/components/sidebar";
+import { withAuth } from "@/components/withAuth";
+
+function DashboardPage() {
+  return (
     <div className="font-sans text-gray-800 bg-black-50 min-h-screen">
-        <div className="flex">
+      <div className="flex">
         <Sidebar />
         <section className="flex-1 bg-gray-100 p-6">
           <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
@@ -22,19 +25,15 @@ export default function DashboardPage() {
             </div>
 
             <div className="lg:col-span-3 p-6 bg-white rounded-2xl shadow-md">
-              <div className="p-4 rounded-xl bg-gray-50">
-               a
-              </div>
-              <div className="p-4 rounded-xl bg-gray-50">
-               b
-              </div>
-              <div className="p-4 rounded-xl bg-gray-50">
-               c
-              </div>
+              <div className="p-4 rounded-xl bg-gray-50">a</div>
+              <div className="p-4 rounded-xl bg-gray-50">b</div>
+              <div className="p-4 rounded-xl bg-gray-50">c</div>
             </div>
           </div>
         </section>
-        </div>
+      </div>
     </div>
   );
 }
+
+export default withAuth(DashboardPage);

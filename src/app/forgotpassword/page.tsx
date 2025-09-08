@@ -1,33 +1,29 @@
-// app/forgot-password/page.tsx (para App Router)
+// app/forgot-password/page.tsx
 
 "use client";
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Head from 'next/head'; // Importar Head desde next/head
+import Head from 'next/head';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e) => {
+  // Se tipa el evento como React.FormEvent<HTMLFormElement>
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      // Aquí iría la lógica para manejar el cambio de contraseña
-      // Por ejemplo, una llamada a tu API
       const response = await fetch('/api/forgot-password', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
 
       if (response.ok) {
-        // Redirigir o mostrar mensaje de éxito
         alert('Se ha enviado un enlace de recuperación a tu email');
       } else {
         alert('Error al procesar la solicitud');
@@ -51,9 +47,8 @@ export default function ForgotPassword() {
         <meta name="description" content="Recuperar contraseña" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      
+
       <div className="min-h-screen bg-blue-200 flex items-center justify-center pt-16">
-        {/* Contenedor del formulario */}
         <div className="register-container relative z-10 bg-white/90 rounded-xl shadow-2xl p-8 w-full max-w-md mx-4">
           <h1 className="text-3xl font-bold text-center text-gray-800">
             Cambiar contraseña
@@ -76,7 +71,6 @@ export default function ForgotPassword() {
               />
             </div>
 
-            {/* Botones */}
             <div className="text-center mt-6 space-x-4">
               <button
                 type="button"
