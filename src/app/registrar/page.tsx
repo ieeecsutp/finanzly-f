@@ -2,8 +2,20 @@
 
 import { Sidebar } from "@/components/sidebar"; 
 import { withAuth } from "@/components/withAuth";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PlusCircle, DollarSign, FileText } from "lucide-react";
+
+interface Categoria {
+  id_categoria: number;
+  nombre: string;
+  tipo: string;
+  total_registros: number;
+}
+
+interface Categorias {
+  ingreso: Categoria[];
+  gasto: Categoria[];
+}
 
 function RegistrarPage() {
   const [formData, setFormData] = useState({
@@ -17,23 +29,55 @@ function RegistrarPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Categorías de ejemplo basadas en tu modelo
-  const categorias = {
-    ingreso: [
-      { id: 1, nombre: "Salario" },
-      { id: 2, nombre: "Freelance" },
-      { id: 3, nombre: "Inversiones" },
-      { id: 4, nombre: "Otros Ingresos" },
-    ],
-    gasto: [
-      { id: 5, nombre: "Alimentación" },
-      { id: 6, nombre: "Transporte" },
-      { id: 7, nombre: "Entretenimiento" },
-      { id: 8, nombre: "Servicios" },
-      { id: 9, nombre: "Salud" },
-      { id: 10, nombre: "Otros Gastos" },
-    ],
-  };
+  // Estado para las categorías
+  const [categorias, setCategorias] = useState<Categorias>({
+    ingreso: [],
+    gasto: [],
+  });
+
+  // Estado de carga
+  const [isLoadingCategorias, setIsLoadingCategorias] = useState(true);
+
+// Fetch de categorías al montar el componente
+  useEffect(() => {
+    const fetchCategorias = async () => {
+      setIsLoadingCategorias(true);
+      try {
+        const token = localStorage.getItem('token'); // o desde tu sistema de auth
+
+        const [ingresosResponse, gastosResponse] = await Promise.all([
+          fetch("http://localhost:4000/api/v1/categorias/tipo/ingreso", {
+            method: "GET",
+            credentials: 'include',
+          }),
+          fetch("http://localhost:4000/api/v1/categorias/tipo/gasto", {
+            method: "GET",
+            credentials: 'include',
+          })
+        ]);
+
+
+        if (!ingresosResponse.ok || !gastosResponse.ok) {
+          throw new Error("Error al cargar categorías");
+        }
+
+        const ingresosData = await ingresosResponse.json();
+        const gastosData = await gastosResponse.json();
+
+        setCategorias({
+          ingreso: ingresosData.data || ingresosData,
+          gasto: gastosData.data || gastosData,
+        });
+      } catch (error) {
+        console.error("Error fetching categorías:", error);
+        // Opcional: Mostrar mensaje de error al usuario
+      } finally {
+        setIsLoadingCategorias(false);
+      }
+    };
+
+    fetchCategorias();
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -54,24 +98,44 @@ function RegistrarPage() {
     }));
   };
 
-  const handleSubmit = async () => {
+const handleSubmit = async () => {
     setIsSubmitting(true);
 
     try {
-      // Aquí harías el POST a tu API endpoint
-      // const response = await fetch('/api/registros', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     ...formData,
-      //     monto: parseFloat(formData.monto),
-      //     fechaCreacion: new Date().toISOString()
-      //   })
-      // });
+      // Preparar los datos según la estructura de tu API
+      const registroData = {
+        id_categoria: parseInt(formData.idCategoria), // Convertir a número
+        tipo: formData.tipo,
+        descripcion: formData.descripcion,
+        monto: parseFloat(formData.monto), // Convertir a número
+        fecha_registro: formData.fechaRegistro
+      };
 
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simular delay
+      // Hacer POST a tu API
+      const response = await fetch('http://localhost:4000/api/v1/registros/usuario', {
+        method: 'POST',
+        credentials: 'include', // Enviar cookies
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registroData)
+      });
+
+      // Verificar si la respuesta es JSON
+      const contentType = response.headers.get('content-type');
+      const isJson = contentType?.includes('application/json');
+      const data = isJson ? await response.json() : null;
+
+      // Verificar si la petición fue exitosa
+      if (!response.ok) {
+        // Obtener mensaje de error del body o usar el status
+        const errorMessage = (data && data.message) || response.statusText || 'Error al guardar el registro';
+        throw new Error(errorMessage);
+      }
+
+      // Éxito: mostrar mensaje y resetear formulario
       setShowSuccess(true);
-
+      
       setFormData({
         tipo: "",
         idCategoria: "",
@@ -81,12 +145,18 @@ function RegistrarPage() {
       });
 
       setTimeout(() => setShowSuccess(false), 3000);
+      
     } catch (error) {
       console.error("Error al guardar:", error);
+      
+      // Mostrar mensaje de error al usuario
+      alert(error instanceof Error ? error.message : 'Error desconocido al guardar el registro');
+      
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   const handleReset = () => {
     setFormData({
@@ -206,18 +276,21 @@ function RegistrarPage() {
                     name="idCategoria"
                     value={formData.idCategoria}
                     onChange={handleInputChange}
-                    disabled={!formData.tipo}
+                    disabled={!formData.tipo || isLoadingCategorias}
                     className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed shadow-sm"
                   >
                     <option value="">
-                      {formData.tipo
+                      {isLoadingCategorias
+                        ? "Cargando categorías..."
+                        : formData.tipo
                         ? "Selecciona una categoría"
                         : "Primero selecciona el tipo"}
                     </option>
                     {formData.tipo &&
+                      !isLoadingCategorias &&
                       categorias[formData.tipo as keyof typeof categorias]?.map(
                         (categoria) => (
-                          <option key={categoria.id} value={categoria.id}>
+                          <option key={categoria.id_categoria} value={categoria.id_categoria}>
                             {categoria.nombre}
                           </option>
                         )
@@ -363,7 +436,7 @@ function RegistrarPage() {
                           {
                             [...categorias.ingreso, ...categorias.gasto].find(
                               (cat) =>
-                                cat.id.toString() === formData.idCategoria
+                                cat.id_categoria.toString() === formData.idCategoria
                             )?.nombre || "Sin categoría"
                           }
                         </p>
