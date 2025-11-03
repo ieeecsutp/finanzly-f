@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button"; // Asegúrate que exista
 
@@ -11,6 +12,9 @@ export default function SignupPage() {
     password: "",
     confirmPassword: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -19,7 +23,7 @@ export default function SignupPage() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       alert("Las contraseñas no coinciden");
@@ -27,6 +31,44 @@ export default function SignupPage() {
     }
     alert(`Registrando usuario: ${formData.name} - ${formData.email}`);
     // Aquí iría tu lógica para enviar datos a la API
+    try {
+      const response = await fetch(
+        `http://localhost:4000/api/v1/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            nombre: formData.name,
+            correo: formData.email,
+            contraseña: formData.password,
+          })
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+
+        if (result.status === "success") {
+
+          // Redirigir al login
+          const redirectUrl = result.data.redirectTo || "/login";
+          router.push(redirectUrl);
+        } else {
+          setError(result.message || "Error en el registro");
+        }
+      } else {
+        // Manejar errores HTTP
+        const errorData = await response.json();
+        setError(errorData.message || `Error: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setError("Error de conexión. Intenta de nuevo.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
