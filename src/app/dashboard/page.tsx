@@ -1,7 +1,6 @@
 "use client";
 
 import { Sidebar } from "@/components/sidebar";
-import { withAuth } from "@/components/withAuth";
 
 function DashboardPage() {
   return (
@@ -36,4 +35,4 @@ function DashboardPage() {
   );
 }
 
-export default withAuth(DashboardPage);
+export default DashboardPage;

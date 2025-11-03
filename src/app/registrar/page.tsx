@@ -1,23 +1,17 @@
 "use client";
 
 import { Sidebar } from "@/components/sidebar"; 
-import { withAuth } from "@/components/withAuth";
 import React, { useState, useEffect } from "react";
+import { useSession, signIn } from "next-auth/react"; // ✅ Importar NextAuth
+import { useRouter } from "next/navigation";
 import { PlusCircle, DollarSign, FileText } from "lucide-react";
-
-interface Categoria {
-  id_categoria: number;
-  nombre: string;
-  tipo: string;
-  total_registros: number;
-}
-
-interface Categorias {
-  ingreso: Categoria[];
-  gasto: Categoria[];
-}
+import { useCategorias } from "@/hooks/useApi";
+import { apiService } from "@/services/apiService";
 
 function RegistrarPage() {
+  const { data: session, status } = useSession(); // ✅ Obtener sesión
+  const router = useRouter();
+  
   const [formData, setFormData] = useState({
     tipo: "",
     idCategoria: "",
@@ -28,56 +22,47 @@ function RegistrarPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Estado para las categorías
-  const [categorias, setCategorias] = useState<Categorias>({
-    ingreso: [],
-    gasto: [],
-  });
+  const { categorias, fetchCategorias, loading: isLoadingCategorias } = useCategorias();
 
-  // Estado de carga
-  const [isLoadingCategorias, setIsLoadingCategorias] = useState(true);
-
-// Fetch de categorías al montar el componente
+  // ✅ Protección de ruta - Verificar autenticación
   useEffect(() => {
-    const fetchCategorias = async () => {
-      setIsLoadingCategorias(true);
-      try {
-        const token = localStorage.getItem('token'); // o desde tu sistema de auth
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
 
-        const [ingresosResponse, gastosResponse] = await Promise.all([
-          fetch("http://localhost:4000/api/v1/categorias/tipo/ingreso", {
-            method: "GET",
-            credentials: 'include',
-          }),
-          fetch("http://localhost:4000/api/v1/categorias/tipo/gasto", {
-            method: "GET",
-            credentials: 'include',
-          })
-        ]);
+  // ✅ Manejar error de refresh token
+  useEffect(() => {
+    if (session?.error === "RefreshAccessTokenError") {
+      signIn(); // Forzar re-login si el refresh token falló
+    }
+  }, [session]);
 
+  // Fetch de categorías al montar el componente
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetchCategorias();
+    }
+  }, [status]);
 
-        if (!ingresosResponse.ok || !gastosResponse.ok) {
-          throw new Error("Error al cargar categorías");
-        }
+  // ✅ Mostrar loading mientras carga la sesión
+  if (status === "loading") {
+    return (
+      <main className="font-sans text-gray-800 bg-black-50 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Verificando sesión...</p>
+        </div>
+      </main>
+    );
+  }
 
-        const ingresosData = await ingresosResponse.json();
-        const gastosData = await gastosResponse.json();
-
-        setCategorias({
-          ingreso: ingresosData.data || ingresosData,
-          gasto: gastosData.data || gastosData,
-        });
-      } catch (error) {
-        console.error("Error fetching categorías:", error);
-        // Opcional: Mostrar mensaje de error al usuario
-      } finally {
-        setIsLoadingCategorias(false);
-      }
-    };
-
-    fetchCategorias();
-  }, []);
+  // ✅ No renderizar nada si no está autenticado (mientras redirige)
+  if (!session) {
+    return null;
+  }
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -98,44 +83,23 @@ function RegistrarPage() {
     }));
   };
 
-const handleSubmit = async () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
+    setError(null);
 
     try {
-      // Preparar los datos según la estructura de tu API
       const registroData = {
-        id_categoria: parseInt(formData.idCategoria), // Convertir a número
+        id_categoria: parseInt(formData.idCategoria),
         tipo: formData.tipo,
         descripcion: formData.descripcion,
-        monto: parseFloat(formData.monto), // Convertir a número
+        monto: parseFloat(formData.monto),
         fecha_registro: formData.fechaRegistro
       };
 
-      // Hacer POST a tu API
-      const response = await fetch('http://localhost:4000/api/v1/registros/usuario', {
-        method: 'POST',
-        credentials: 'include', // Enviar cookies
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(registroData)
-      });
+      // ✅ apiService ya incluye el token automáticamente
+      await apiService.post('/registros/usuario', registroData);
 
-      // Verificar si la respuesta es JSON
-      const contentType = response.headers.get('content-type');
-      const isJson = contentType?.includes('application/json');
-      const data = isJson ? await response.json() : null;
-
-      // Verificar si la petición fue exitosa
-      if (!response.ok) {
-        // Obtener mensaje de error del body o usar el status
-        const errorMessage = (data && data.message) || response.statusText || 'Error al guardar el registro';
-        throw new Error(errorMessage);
-      }
-
-      // Éxito: mostrar mensaje y resetear formulario
       setShowSuccess(true);
-      
       setFormData({
         tipo: "",
         idCategoria: "",
@@ -146,17 +110,18 @@ const handleSubmit = async () => {
 
       setTimeout(() => setShowSuccess(false), 3000);
       
-    } catch (error) {
-      console.error("Error al guardar:", error);
-      
-      // Mostrar mensaje de error al usuario
-      alert(error instanceof Error ? error.message : 'Error desconocido al guardar el registro');
-      
+    } catch (err: any) {
+      // ✅ Manejar específicamente error 401 (no autenticado)
+      if (err.response?.status === 401) {
+        setError('Tu sesión expiró. Por favor, inicia sesión nuevamente.');
+        setTimeout(() => signIn(), 2000);
+      } else {
+        setError(err.response?.data?.message || err.message || 'Error al guardar');
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
-
 
   const handleReset = () => {
     setFormData({
@@ -512,4 +477,4 @@ const handleSubmit = async () => {
   );
 }
 
-export default withAuth(RegistrarPage);
+export default RegistrarPage;

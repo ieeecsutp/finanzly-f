@@ -11,8 +11,9 @@ export function withAuth<P extends object>(WrappedComponent: React.ComponentType
     useEffect(() => {
       const token = document.cookie
         .split("; ")
-        .find((row) => row.startsWith("token="));
+        .find((row) => row.startsWith("refreshToken="));
 
+      console.log(token)
       if (!token) {
         router.push("/login"); // 🚫 redirigir si no hay token
       } else {
