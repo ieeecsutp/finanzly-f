@@ -108,7 +108,11 @@ function RegistrarPage() {
         fechaRegistro: new Date().toISOString().split("T")[0],
       });
 
-      setTimeout(() => setShowSuccess(false), 3000);
+      // Mostrar mensaje corto y volver al dashboard para refrescar balances
+      setTimeout(() => {
+        setShowSuccess(false);
+        router.push('/dashboard');
+      }, 900);
       
     } catch (err: any) {
       // ✅ Manejar específicamente error 401 (no autenticado)
