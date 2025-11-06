@@ -62,7 +62,14 @@ export default function HistorialRegistros() {
         try {
             const response = await apiService.delete(`/registros/${id_registro}`);
             alert(`Registro eliminado con éxito.`);
+            // Refrescar listado localmente
             fetchRegistros();
+            // Notificar al resto de la app que los registros cambiaron (para actualizar balances, etc.)
+            try {
+                window.dispatchEvent(new Event('registrosUpdated'));
+            } catch (e) {
+                // peticiones server-side o entornos sin window pueden fallar; silenciosamente ignorar
+            }
         } catch (error) {
             const err = error as AxiosError<{message: string}>;
             if (err.response?.status === 401) {

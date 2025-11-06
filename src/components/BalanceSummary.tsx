@@ -17,6 +17,16 @@ export default function BalanceSummary({ onBalanceUpdate }: BalanceSummaryProps)
 
   useEffect(() => {
     fetchBalances();
+    // Escuchar eventos globales que indiquen cambios en registros (creación/eliminación)
+    const onRegistrosUpdated = () => {
+      fetchBalances();
+    };
+
+    window.addEventListener('registrosUpdated', onRegistrosUpdated);
+
+    return () => {
+      window.removeEventListener('registrosUpdated', onRegistrosUpdated);
+    };
   }, [session]);
 
   const fetchBalances = async () => {
