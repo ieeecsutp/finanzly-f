@@ -10,6 +10,7 @@ const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Importante para las cookies
 });
 
 // Interceptor para añadir el token automáticamente

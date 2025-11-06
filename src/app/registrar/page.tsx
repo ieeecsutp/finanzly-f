@@ -409,11 +409,9 @@ function RegistrarPage() {
                           <span className="font-semibold">Descripción:</span>{" "}
                           {formData.descripcion}
                         </p>
-                        <p>
+                          <p>
                           <span className="font-semibold">Fecha:</span>{" "}
-                          {new Date(formData.fechaRegistro).toLocaleDateString(
-                            "es-PE"
-                          )}
+                          {formData.fechaRegistro}
                         </p>
                       </div>
                     </div>

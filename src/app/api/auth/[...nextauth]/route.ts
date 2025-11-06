@@ -19,8 +19,11 @@ async function refreshAccessToken(token: any) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Cookie: `refreshToken=${token.refreshToken}`,
       },
+      credentials: 'include',
+      body: JSON.stringify({
+        refresh_token: token.refreshToken
+      })
     });
 
     const refreshedTokens = await response.json();
@@ -33,7 +36,7 @@ async function refreshAccessToken(token: any) {
       ...token,
       accessToken: refreshedTokens.data.access_token,
       accessTokenExpires: Date.now() + 15 * 60 * 1000,
-      refreshToken: token.refreshToken,
+      refreshToken: refreshedTokens.data.refresh_token,
     };
   } catch (error) {
     console.error("Error refreshing access token:", error);
