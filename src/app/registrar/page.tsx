@@ -108,7 +108,18 @@ function RegistrarPage() {
         fechaRegistro: new Date().toISOString().split("T")[0],
       });
 
-      setTimeout(() => setShowSuccess(false), 3000);
+      // Mostrar mensaje corto y permanecer en la misma página (no redirigir)
+      setTimeout(() => {
+        setShowSuccess(false);
+        // Se eliminó la redirección a /dashboard para mantener al usuario en la página
+      }, 900);
+
+      // Notificar a otros componentes que los registros cambiaron (para actualizar balances en dashboard)
+      try {
+        window.dispatchEvent(new Event('registrosUpdated'));
+      } catch (e) {
+        // En entornos donde no exista `window` (SSR) se ignora
+      }
       
     } catch (err: any) {
       // ✅ Manejar específicamente error 401 (no autenticado)
@@ -409,11 +420,9 @@ function RegistrarPage() {
                           <span className="font-semibold">Descripción:</span>{" "}
                           {formData.descripcion}
                         </p>
-                        <p>
+                          <p>
                           <span className="font-semibold">Fecha:</span>{" "}
-                          {new Date(formData.fechaRegistro).toLocaleDateString(
-                            "es-PE"
-                          )}
+                          {formData.fechaRegistro}
                         </p>
                       </div>
                     </div>
