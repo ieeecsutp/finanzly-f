@@ -45,6 +45,14 @@ export function Sidebar() {
               💵 <span>Registrar</span>
             </Link>
           </li>
+          <li>
+            <Link
+              href="/history"
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#B6FAFA]"
+            >
+              🕐 <span>Historial Sessión</span>
+            </Link>
+          </li>
         </ul>
       </nav>
 
