@@ -25,45 +25,43 @@ export function Header() {
   };
 
   return (
-    <header className="bg-white dark:bg-background shadow p-4">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="text-xl font-bold">
-          <Link href="/" className="hover:opacity-80 transition">
-            💰Finanzly
-          </Link>
-        </div>
+    <header className="bg-white dark:bg-background shadow p-4 flex justify-between items-center">
+      <div className="text-xl font-bold">
+        <Link href="/" className="px-2 py-1 hover:opacity-80 transition">
+          💰Finanzly
+        </Link>
+      </div>
 
-        {/* Desktop nav */}
-        <nav className="hidden sm:flex items-center space-x-3">
-          <Link href="/#nosotros" className="text-gray-700 dark:text-foreground hover:text-blue-600 px-2 py-1">
-            Nosotros
-          </Link>
-          <Link href="/#blog" className="text-gray-700 dark:text-foreground hover:text-blue-600 px-2 py-1">
-            Blog
-          </Link>
-          <Link href="/#recursos" className="text-gray-700 dark:text-foreground hover:text-blue-600 px-2 py-1">
-            Recursos
-          </Link>
+      {/* Desktop nav */}
+      <nav className="hidden sm:flex items-center space-x-3">
+        <Link href="/#nosotros" className="text-gray-700 dark:text-foreground hover:text-blue-600 px-2 py-1">
+          Nosotros
+        </Link>
+        <Link href="/#blog" className="text-gray-700 dark:text-foreground hover:text-blue-600 px-2 py-1">
+          Blog
+        </Link>
+        <Link href="/#recursos" className="text-gray-700 dark:text-foreground hover:text-blue-600 px-2 py-1">
+          Recursos
+        </Link>
 
-          <NavButton text="Iniciar Sesión" href="/login" variant="outline" />
-          <NavButton text="Registrarse" href="/signup" variant="solid" />
-        </nav>
+        <NavButton text="Iniciar Sesión" href="/login" variant="outline" />
+        <NavButton text="Registrarse" href="/signup" variant="solid" />
+      </nav>
 
-        {/* Mobile controls: single button to toggle sidebar or internal menu */}
-        <div className="sm:hidden flex items-center gap-2">
-          <button
-            onClick={handleMobileClick}
-            aria-label="Abrir menú principal"
-            className="p-2 rounded-md bg-gray-100"
-          >
-            ☰
-          </button>
-        </div>
+      {/* Mobile controls: single button to toggle sidebar or internal menu */}
+      <div className="sm:hidden flex items-center gap-2">
+        <button
+          onClick={handleMobileClick}
+          aria-label="Abrir menú principal"
+          className="p-2 rounded-md bg-gray-100"
+        >
+          ☰
+        </button>
       </div>
 
       {/* Internal mobile menu (only when there's no page sidebar) */}
       {!hasSidebar && open && (
-        <div className="sm:hidden mt-3 space-y-2 px-2">
+        <div className="sm:hidden absolute top-16 left-0 right-0 mt-3 space-y-2 px-2 bg-white shadow">
           <Link href="/#nosotros" className="block text-gray-700 hover:text-blue-600 px-2 py-2 rounded">
             Nosotros
           </Link>
