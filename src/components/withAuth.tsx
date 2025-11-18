@@ -2,31 +2,36 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export function withAuth<P extends object>(WrappedComponent: React.ComponentType<P>) {
   return function ProtectedPage(props: P) {
     const router = useRouter();
+    const { data: session, status } = useSession();
     const [isAuth, setIsAuth] = useState(false);
 
     useEffect(() => {
-      const token = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("refreshToken="));
+      // Si aún está cargando, no hacemos nada
+      if (status === "loading") {
+        return;
+      }
 
-      console.log(token)
-      if (!token) {
-        router.push("/login"); // 🚫 redirigir si no hay token
-      } else {
+      // Si no hay sesión o el token tiene error, redirigir a login silenciosamente
+      if (status === "unauthenticated" || !session?.accessToken) {
+        router.push("/login");
+        return;
+      }
+
+      // Si hay sesión válida, permitir acceso
+      if (status === "authenticated" && session?.user) {
         setIsAuth(true);
       }
-    }, [router]);
+    }, [status, session, router]);
 
+    // Renderizar el componente solo si está autenticado
+    // Si no, simplemente renderiza null (sin mostrar nada)
     if (!isAuth) {
-      return (
-        <main className="flex items-center justify-center h-screen">
-          <p className="text-gray-600">Verificando sesión...</p>
-        </main>
-      );
+      return null;
     }
 
     return <WrappedComponent {...props} />;

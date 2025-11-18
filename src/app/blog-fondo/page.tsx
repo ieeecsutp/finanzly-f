@@ -1,6 +1,3 @@
-
-
-
 export default function BlogFondoPage() {
   return (
     <main className="font-sans text-gray-800 p-4 py-16 bg-pink-50 min-h-screen">
