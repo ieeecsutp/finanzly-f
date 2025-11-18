@@ -46,7 +46,7 @@ export default function LoginPage() {
 
   return (
     <main className="bg-blue-200 min-h-screen flex items-center justify-center py-8 sm:py-16 px-4">
-      <div className="relative z-10 bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-md sm:max-w-lg mx-2">
+      <div className="relative z-10 bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-md mx-auto px-4 sm:px-6">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
           Bienvenido de nuevo
         </h1>
