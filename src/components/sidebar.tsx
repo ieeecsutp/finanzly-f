@@ -93,8 +93,10 @@ export function Sidebar() {
 
       // focus first focusable in panel after it's visible
       requestAnimationFrame(() => {
-        const nodes = panel.querySelectorAll<HTMLElement>(focusableSelector);
-        if (nodes.length) nodes[0].focus();
+        if (panel) {
+          const nodes = panel.querySelectorAll<HTMLElement>(focusableSelector);
+          if (nodes.length) nodes[0].focus();
+        }
       });
 
       document.addEventListener('keydown', handleKeyDown);
@@ -160,7 +162,6 @@ export function Sidebar() {
       {isVerySmall ? (
         /* Very small screens: always-visible dropdown list */
         <aside
-          ref={panelRef}
           className="sm:hidden w-full bg-[#D1ECF1] shadow-md border-b border-gray-300"
           aria-label="Menú de navegación móvil"
         >
