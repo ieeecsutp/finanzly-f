@@ -72,8 +72,8 @@ export default function SignupPage() {
   };
 
   return (
-      <main className="bg-blue-200 min-h-screen flex items-center justify-center pt-16 px-4">
-        <div className="relative z-10 bg-white/90 rounded-xl shadow-2xl p-8 w-full max-w-md mx-4">
+      <main className="bg-blue-200 min-h-screen flex items-center justify-center py-8 sm:py-16 px-4">
+        <div className="relative z-10 bg-white/90 rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-md sm:max-w-lg mx-2">
           <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">Regístrate</h1>
           <p className="text-center mb-6 text-gray-600">Crea una cuenta para acceder a nuestros servicios</p>
 

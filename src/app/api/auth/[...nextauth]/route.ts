@@ -112,15 +112,46 @@ export const authOptions: NextAuthOptions = {
         };
       }
 
+      // Verificar si hay un error previo (token revocado, etc)
+      if (token.error) {
+        return token;
+      }
+
+      // Si el access token aún es válido, devolver el token sin refrescarlo
       if (Date.now() < (token.accessTokenExpires as number)) {
         return token;
       }
 
-      return refreshAccessToken(token);
+      // El access token expiró, intentar refrescar
+      try {
+        const refreshedToken = await refreshAccessToken(token);
+        
+        // Si hay error de refresh, marcar el token
+        if (refreshedToken.error) {
+          return {
+            ...refreshedToken,
+            error: "RefreshAccessTokenError",
+          };
+        }
+        
+        return refreshedToken;
+      } catch (error) {
+        console.error("Error refrescando token:", error);
+        return {
+          ...token,
+          error: "RefreshAccessTokenError",
+        };
+      }
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken;
-      session.error = token.error;
+      // Si hay un error en el token, propagarlo a la sesión
+      if (token.error) {
+        session.error = token.error;
+      } else {
+        session.accessToken = token.accessToken;
+        session.error = undefined;
+      }
+      
       session.user = token.user as any;
       return session;
     },

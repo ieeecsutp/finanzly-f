@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { PlusCircle, DollarSign, FileText } from "lucide-react";
 import { useCategorias } from "@/hooks/useApi";
 import { apiService } from "@/services/apiService";
+import { withAuth } from "@/components/withAuth";
 
 function RegistrarPage() {
   const { data: session, status } = useSession(); // ✅ Obtener sesión
@@ -26,13 +27,6 @@ function RegistrarPage() {
 
   const { categorias, fetchCategorias, loading: isLoadingCategorias } = useCategorias();
 
-  // ✅ Protección de ruta - Verificar autenticación
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  }, [status, router]);
-
   // ✅ Manejar error de refresh token
   useEffect(() => {
     if (session?.error === "RefreshAccessTokenError") {
@@ -46,23 +40,6 @@ function RegistrarPage() {
       fetchCategorias();
     }
   }, [status]);
-
-  // ✅ Mostrar loading mientras carga la sesión
-  if (status === "loading") {
-    return (
-      <main className="font-sans text-gray-800 bg-black-50 min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Verificando sesión...</p>
-        </div>
-      </main>
-    );
-  }
-
-  // ✅ No renderizar nada si no está autenticado (mientras redirige)
-  if (!session) {
-    return null;
-  }
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -153,8 +130,10 @@ function RegistrarPage() {
 
   return (
     <main className="font-sans text-gray-800 bg-black-50 min-h-screen">
-      <div className="flex">
-        <Sidebar />
+      <div className="flex flex-col sm:flex-row">
+        <div className="sm:w-64">
+          <Sidebar />
+        </div>
 
         <section className="flex-1 bg-gray-100 p-6">
           <h1 className="text-2xl font-bold mb-4">Nuevo Registro</h1>
@@ -486,4 +465,4 @@ function RegistrarPage() {
   );
 }
 
-export default RegistrarPage;
+export default withAuth(RegistrarPage);
