@@ -136,6 +136,7 @@ pnpm dev
 - 📖 [Documentación de Next.js](https://nextjs.org/docs)
 - 🎓 [Tutorial de Next.js](https://nextjs.org/learn)
 - 📑 [Documento del Proyecto](https://docs.google.com/document/d/1eRe6XKWoFLfaLqhJ2Iigp2GmwdcX0Jbk2I21G00_-MY/edit?tab=t.0)
+- 📕 [Documento SCRUM](https://utpedupe-my.sharepoint.com/:w:/g/personal/u21231760_utp_edu_pe/EQ80B6-l-XhOl3eReJnh5HIBUTivN900YpY7TSTWoiAMXg?rtime=6ISQEF4E3kg)
 
 
 ## 👥 Equipo B
